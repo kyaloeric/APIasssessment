@@ -1,6 +1,9 @@
 .package.json
 .tsconfig.json
 .nodemon.json
-.node_modules
+node_modules
 .package-lock.json
 .env
+dist
+build
+test.r
