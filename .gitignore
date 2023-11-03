@@ -1,7 +1,6 @@
 .package.json
-tsconfig.json
-nodemon.json
-node_modules
+.tsconfig.json
+.nodemon.json
+.node_modules
 .package-lock.json
 .env
-

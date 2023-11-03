@@ -1,15 +1,18 @@
-import { Router, Request, Response } from 'express';
-import { NoteController } from '../controllers/noteControllers';
-import { NoteService } from '../services/noteService';
+import { Router } from 'express';
+// import { NoteController } from '../controllers/noteController';
+// import { NoteService } from '../services/noteServices';
+import { pool } from 'mssql';
+import { createNote } from '../services/noteServices';
+// import { createControllerNote } from '../controllers/noteController';
 
-const router = Router();
-const noteService = new NoteService();
-const noteController = new NoteController(noteService);
+const noteRouter = Router();
+// const noteService = new NoteService(pool);
+// const noteController = new NoteController(noteService);
 
-router.post('/notes', noteController.createNote);
-router.get('/notes', noteController.getAllNotes);
-router.get('/notes/:id', noteController.getNoteById);
-router.put('/notes/:id', noteController.updateNote);
-router.delete('/notes/:id', noteController.deleteNote);
+noteRouter.post('/notes', createNote);
+// noteRouter.get('/notes', noteController.getAllNotes);
+// noteRouter.get('/notes/:id', noteController.getNoteById);
+// noteRouter.put('/notes/:id', noteController.updateNote);
+// noteRouter.delete('/notes/:id', noteController.deleteNote);
 
-export default router;
+export default noteRouter;

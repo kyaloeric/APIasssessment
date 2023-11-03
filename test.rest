@@ -1,0 +1,24 @@
+
+###
+POST http://localhost:3000/api/notes
+Content-Type: application/json
+
+{
+    "id": "6",
+    "title" : "Yes",
+    "content" : "theh"
+}
+
+
+
+#####
+GET http://localhost:3000/api/notes
+
+
+###
+
+post http://localhost:3000/api/notes
+Content-Type: application/json
+{
+    
+}
