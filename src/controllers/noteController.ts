@@ -1,54 +1,136 @@
-import { Request, Response, response } from 'express';
-// import { createNote } from '../services/noteServices';
+import { Request, Response } from "express";
+import { query } from "../database/dbconnect";
+import { Note } from "../types/interface";
+import { v4 as uuidv4 } from "uuid";
+import { createNoteSchema, updateNoteSchema } from "../validators/validator";
 
-// export class NoteController {
-// //   private noteService: create;
+// testing if we reach here
+export const testNote = (req: Request, res: Response) => {
+  try {
+    res.send({ message: "Tested successfully" });
+  } catch (error) {
+    return res.status(501).json({ error: error });
+  }
+};
 
-// //   constructor(noteService: NoteService) {
-//     this.noteService = noteService;
-//   }
+//logic for creating new note
+export const createNote = async (req: Request, res: Response) => {
+  try {
+    const { error } = createNoteSchema.validate(req.body);
 
-//   createNote = (req: Request, res: Response) => {
-//     const { title, content } = req.body;
-//     const newNote = this.noteService.createNote();
-//     res.status(201).json(newNote);
-//   };
+    if (error) {
+      return res.status(400).json({ error: error.details[0].message });
+    }
 
-//   getAllNotes = (req: Request, res: Response) => {
-//     const allNotes = this.noteService.getAllNotes();
-//     res.json(allNotes);
-//   };
+    const { title, content } = req.body;
 
-//   getNoteById = (req: Request, res: Response) => {
-//     const note = this.noteService.getNoteById(req.params.id);
-//     if (!note) {
-//       return res.status(404).json({ message: 'Note not found' });
-//     }
-//     res.json(note);
-//   };
+    const newNote: Note = {
+      id: uuidv4(),
+      title,
+      content,
+      createdAt: new Date(),
+    };
 
-//   updateNote = (req: Request, res: Response) => {
-//     const updatedNote = this.noteService.updateNote(req.params.id, req.body);
-//     if (!updatedNote) {
-//       return res.status(404).json({ message: 'Note not found' });
-//     }
-//     res.json(updatedNote);
-//   };
+    const insertQuery = `INSERT INTO note (_id,title, content, createdAt) VALUES ('${
+      newNote.id
+    }','${newNote.title}', '${
+      newNote.content
+    }', '${newNote.createdAt.toISOString()}')`;
+    await query(insertQuery);
 
-//   deleteNote = (req: Request, res: Response) => {
-//     const success = this.noteService.deleteNote(req.params.id);
-//     if (!success) {
-//       return res.status(404).json({ message: 'Note not found' });
-//     }
-//     res.status(204).send();
-//   };
-// }
+    res.status(201).json(newNote);
+  } catch (error) {
+    return res.status(500).json({ error: (error as Error).message });
+  }
+};
 
+//logic for getting all notes
+export const getAllNotes = async (req: Request, res: Response) => {
+  try {
+    const queryString = "SELECT * FROM note";
 
+    const result = await query(queryString);
 
+    const notes: Note[] = result.recordset;
 
-// export function createControllerNote  (req: Request, res: Response) {
-//   const newNote = req.body;
-//   createNote(newNote);
-//   res.json(newNote)
-// };
+    res.json(notes);
+  } catch (error) {
+    return res.status(500).json({ error: (error as Error).message });
+  }
+};
+
+//logic for grtting single note
+export const getSingleNote = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    // console.log(typeof id);
+
+    const queryString = `SELECT * FROM note WHERE _id = '${id}'`;
+    // const queryString = `SELECT * FROM note `;
+
+    const result = await query(queryString);
+
+    if (result.recordset.length === 0) {
+      return res.status(404).json({ message: "Note not found" });
+    }
+
+    const note: Note = result.recordset[0];
+
+    res.status(200).json(note);
+  } catch (error) {
+    return res.status(500).json({ error: (error as Error).message });
+  }
+};
+
+//logic to update a note
+export const updateNote = async (req: Request, res: Response) => {
+  try {
+    const { error } = updateNoteSchema.validate(req.body);
+
+    if (error) {
+      return res.status(400).json({ error: error.details[0].message });
+    }
+    const { id, title, content }: Note = req.body;
+
+    const NewcreatedAt = new Date();
+
+    const updateQuery = `
+      UPDATE note
+      SET title = '${title}', content = '${content}', createdAt = '${NewcreatedAt.toISOString()}'
+      WHERE _id = '${id}'
+    `;
+
+    await query(updateQuery);
+
+    res.json({ message: "Note updated successfully" });
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ error: "Error updating note: " + (error as Error).message });
+  }
+};
+
+// logic to delete a note
+export const deleteNote = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    if (!id) {
+      return res
+        .status(400)
+        .json({ error: "ID is required in the request body." });
+    }
+
+    const existingNote = await query(`SELECT * FROM note WHERE _id = '${id}'`);
+
+    if (!existingNote.recordset || existingNote.recordset.length === 0) {
+      return res.status(404).json({ error: "Note not found." });
+    }
+
+    await query(`DELETE FROM note WHERE _id = '${id}'`);
+
+    return res.status(200).json({ message: "Note deleted successfully." });
+  } catch (error) {
+    return res.status(500).json({ error: (error as Error).message });
+  }
+};

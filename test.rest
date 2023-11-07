@@ -1,6 +1,6 @@
 
 ###
-POST http://localhost:3000/api/notes
+POST http://localhost:3000/notes/createNote
 Content-Type: application/json
 
 {
@@ -22,3 +22,28 @@ Content-Type: application/json
 {
     
 }
+
+
+# GET http://localhost:3501
+
+####
+
+post http://localhost:3501/note
+Content-Type: application/json
+ 
+{
+"title":"1234",
+"content":"eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+}
+####
+get http://localhost:3501/note
+
+####
+
+get http://localhost:3501/note/a608d38c-5826-49a5-b090-12cdb2ff56cc
+
+####
+
+
+#####
+DELETE  http://localhost:3501/note/528fb65e-fdfe-4df9-80d8-65fa08bd6169
